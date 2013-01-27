@@ -1,0 +1,34 @@
+{
+    "name"       : "mojito-server",
+    "description": "Mojito Server Component",
+    "version"    : "0.1.0",
+    "author"     : "Caridy Patino <caridy@gmail.com> (http://github.com/caridy)",
+    "preferGlobal": true,
+
+    "engines": {
+        "node": "0.8.x",
+        "npm" : ">=1.1.2"
+    },
+
+    "dependencies": {
+        "combohandler"       : "latest",
+        "express"            : "3.x",
+        "express-expose"     : "0.3.x",
+        "express3-handlebars": "latest",
+        "yui"                : "3.8.x"
+    },
+
+    "devDependencies": {
+        "async": "*",
+        "commander": "1.0.1",
+        "mockery": "~1.4.0",
+        "node-static": ">0.6"
+    },
+
+    "keywords": [
+        "framework",
+        "webapp",
+        "mojito"
+    ]
+
+}
