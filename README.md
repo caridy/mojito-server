@@ -8,16 +8,25 @@ be used by `mojito-dispatch` engine or any other compatible engine.
 ### Usage
 
 ```
+/*jslint node:true*/
+
+'use strict';
+
 var mojito = require('mojito-server'),
-    contextualizer = mojito.contextualizer({});
+    contextualizer = mojito.contextualizer({
+        foo: 'context',
+        dimensions: {}  /* can this come from locator? */
+    }),
     app = mojito({
-        custom: 'settings'
+        dispatcher: {}, /* require('mojito-dispatcher') ? */
+        locator:    {}, /* require('mojito-locator') ? */
+        foo: 'mojito'
     });
 
 // plugging mojito meta into req by default
 app.use(mojito.core);
 
-app.configure('development', function() {
+app.configure('development', function () {
     app.use(mojito.yui({
         combine: false,
         debug: true,
@@ -25,7 +34,7 @@ app.configure('development', function() {
     }).local);
 });
 
-app.configure('production', function() {
+app.configure('production', function () {
     app.use(mojito.yui({}).cdn);
     // Set a few security-related headers.
     // X-Content-Type-Options=nosniff
@@ -33,9 +42,12 @@ app.configure('production', function() {
     app.use(mojito.lockDownSecurity);
 });
 
+// we could drive this by dimensions automatically,
+// or manually like this:
 app.use(contextualizer.lang);
 app.use(contextualizer.device);
 
+// mojito will use dispatcher config to dispatch "index"
 app.get('/', mojito.dispatch('index'));
 
 app.listen(app.get('port'), function () {
