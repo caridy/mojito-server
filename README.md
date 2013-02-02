@@ -13,17 +13,17 @@ be used by `mojito-dispatch` engine or any other compatible engine.
 'use strict';
 
 var mojito = require('mojito-server'),
-    contextualizer = mojito.contextualizer({
-        foo: 'context',
-        dimensions: {}  /* can this come from locator? */
-    }),
     app = mojito({
         dispatcher: {}, /* require('mojito-dispatcher') ? */
         locator:    {}, /* require('mojito-locator') ? */
         foo: 'mojito'
+    }),
+    contextualizer = mojito.contextualizer({
+        foo: 'context',
+        dimensions: {}  /* can this come from locator? */
     });
 
-// plugging mojito meta into req by default
+// plugging mojito meta into req and res by default
 app.use(mojito.core);
 
 app.configure('development', function () {
