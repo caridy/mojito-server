@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="{{lang}}" dir="{{dir}}">
+<head>
+    <meta charset="{{charset}}" />
+    {{#metas}}<meta name="{{name}}" content="{{content}}" />
+    {{/metas}}
+    <title>{{title}}</title>
+    {{{top}}}
+</head>
+<body>
+    {{{body}}}
+    {{{bottom}}}
+    <script>
+    YUI.applyConfig({{{yui_config}}});
+    {{{mojito_env}}}
+    {{{mojito_init}}}
+    </script>
+</body>
+</html>

@@ -50,6 +50,13 @@ app.use(contextualizer.device);
 // mojito will use dispatcher config to dispatch "index"
 app.get('/', mojito.dispatch('index'));
 
+// Error handlers
+app.use(mojito.notFound);
+app.configure('production', function () {
+    app.use(mojito.internalServerError);
+});
+
+// listening
 app.listen(app.get('port'), function () {
     console.log("Server listening on port " +
         app.get('port') + " in " + app.get('env') + " mode");
