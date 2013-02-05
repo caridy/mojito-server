@@ -50,6 +50,20 @@ app.use(contextualizer.device);
 // mojito will use dispatcher config to dispatch "index"
 app.get('/', mojito.dispatch('index'));
 
+mojito.exposeRoutes(function () {
+    // these are all the routes that our client side will be able to
+    // dispatch without a fullpage refresh, `mojito.dispatch()` is
+    // required. The grouping helps with apps with different pages
+    // where each page represents an app in the client side.
+    app.get('/photo', mojito.dispatch('photo'));
+
+    // you can have route specific middleware,
+    // and you can also add group specific middleware
+    // by passing them into `mojito.exposeRoutes()`
+    app.get('/photos', function (req, res, next) { next(); },
+            mojito.dispatch('photos'));
+});
+
 // Error handlers
 app.use(mojito.notFound);
 app.configure('production', function () {
