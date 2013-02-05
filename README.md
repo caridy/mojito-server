@@ -8,7 +8,7 @@ be used by `mojito-dispatch` engine or any other compatible engine.
 ### Usage
 
 ```
-/*jslint node:true*/
+/*jslint node:true, nomen: true*/
 
 'use strict';
 
@@ -31,11 +31,21 @@ app.configure('development', function () {
         combine: false,
         debug: true,
         filter: "debug"
-    }).local);
+    }).local());
+
+    // you can also use a custom version of YUI by
+    // specifying a custom path as a second argument,
+    // or by installing yui at th app level using npm:
+    // app.use(mojito.yui({
+    //     combine: false,
+    //     debug: true,
+    //     filter: "debug"
+    // }, __dirname + '/node_modules/yui/').local();
+
 });
 
 app.configure('production', function () {
-    app.use(mojito.yui({}).cdn);
+    app.use(mojito.yui({}).cdn());
     // Set a few security-related headers.
     // X-Content-Type-Options=nosniff
     // X-Frame-Options=SAMEORIGIN
