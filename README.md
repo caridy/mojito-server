@@ -14,48 +14,85 @@ be used by `mojito-dispatch` engine or any other compatible engine.
 
 var mojito = require('mojito-server'),
     app = mojito({
-        dispatcher: {}, /* require('mojito-dispatcher') ? */
-        locator:    {}, /* require('mojito-locator') ? */
         foo: 'mojito'
-    }),
-    contextualizer = mojito.contextualizer({
-        foo: 'context',
-        dimensions: {}  /* can this come from locator? */
     });
 
-// plugging mojito meta into req and res by default
-app.use(mojito.core);
+// mojitizing extensions so they can be available thru mojito.*
+// TODO: move yui and contextualizer into their own pkgs
+mojito.plug(require('./node_modules/mojito-server/lib/yui'));
+mojito.plug(require('./node_modules/mojito-server/lib/contextualizer'));
+
+mojito.contextualizer({
+    foo: 'context',
+    dimensions: { /* can should be coming from locator */
+        lang: {
+            "en-US": null
+        },
+        speed: {
+            dialup: null,
+            dsl: null
+        }
+    }
+});
+
+// registering a `dispatch engine`, the only requirement is to have
+// a `dispatch` method.
+mojito.dispatcher('mojito', {
+    dispatch: function (name, options, runtime, callback) {
+        callback(null, JSON.stringify({
+            name: name,
+            options: options,
+            runtime: runtime
+        }));
+    }
+});
 
 app.configure('development', function () {
-    app.use(mojito.yui({
+    mojito.yui({
         combine: false,
         debug: true,
         filter: "debug"
-    }).local());
-
+    });
     // you can also use a custom version of YUI by
     // specifying a custom path as a second argument,
     // or by installing yui at th app level using npm:
-    // app.use(mojito.yui({
+    // mojito.yui({
     //     combine: false,
     //     debug: true,
     //     filter: "debug"
-    // }, __dirname + '/node_modules/yui/').local();
+    // }, __dirname + '/node_modules/yui/');
 
+    // serving YUI from local server
+    app.use(mojito.yui.local({
+        // overruling any default config provided by mojito.yui.cdn()
+        // routine by passing a new value. E.g:
+        // comboSep: '~'
+    }));
 });
 
 app.configure('production', function () {
-    app.use(mojito.yui({}).cdn());
+    mojito.yui({
+        combine: true,
+        debug: false,
+        filter: "min"
+    });
+
+    // serving YUI from CDN directly
+    app.use(mojito.yui.cdn());
     // Set a few security-related headers.
     // X-Content-Type-Options=nosniff
     // X-Frame-Options=SAMEORIGIN
     app.use(mojito.lockDownSecurity);
 });
 
-// we could drive this by dimensions automatically,
+// we could drive this by dimensions automatically by using
+// `app.use(mojito.contextualizer.all())` which matches contextualizer.* and
+// dimensions.*, so by hanging a middleware from contextualizer
+// you are automatically enabling a new dimension to be populated;
+app.use(mojito.contextualizer.all);
 // or manually like this:
-app.use(contextualizer.lang);
-app.use(contextualizer.device);
+// app.use(mojito.contextualizer.lang);
+// app.use(mojito.contextualizer.device);
 
 // mojito will use dispatcher config to dispatch "index"
 app.get('/', mojito.dispatch('index'));
@@ -65,12 +102,14 @@ mojito.exposeRoutes(function () {
     // dispatch without a fullpage refresh, `mojito.dispatch()` is
     // required. The grouping helps with apps with different pages
     // where each page represents an app in the client side.
-    app.get('/photo', mojito.dispatch('photo'));
+    app.get('/photo', mojito.dispatch('photo', {
+        json: true
+    }));
 
     // you can have route specific middleware,
     // and you can also add group specific middleware
     // by passing them into `mojito.exposeRoutes()`
-    app.get('/photos', function (req, res, next) { next(); },
+    app.get('/photos', mojito.data('place'),
             mojito.dispatch('photos'));
 });
 
