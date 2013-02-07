@@ -11,20 +11,12 @@
     },
 
     "dependencies": {
-        "combohandler"       : "latest",
         "express"            : "3.x",
         "express-expose"     : "0.3.x",
-        "express3-handlebars": "latest",
-        "mime"               : "1.2.9",
-        "yui"                : "3.8.x"
+        "express3-handlebars": "latest"
     },
 
-    "devDependencies": {
-        "async": "*",
-        "commander": "1.0.1",
-        "mockery": "~1.4.0",
-        "node-static": ">0.6"
-    },
+    "main": "lib/mojito",
 
     "keywords": [
         "framework",

@@ -1,9 +1,11 @@
-### Experimental repo for Mojito Server component on top of Express
+### Mojito Server Component
 
-`mojito-server` component groups a series of `connect` and `express`-like middleware that
-will be used when a `mojito()` app is created, but they can also be used directly just like
-any `express` middleware. As a result, they will augment `req` object with data that might
-be used by `mojito-dispatch` engine or any other compatible engine.
+`mojito-server` component groups a series of `connect` and
+`express`-like middleware that will be used when a `mojito()`
+app is created, but they can also be used directly just like
+any `express` middleware. As a result, they will augment `req`
+object with data that might be used by `mojito-dispatch`
+engine or any other compatible engine.
 
 ### Usage
 
@@ -18,12 +20,11 @@ var mojito = require('mojito-server'),
     });
 
 // mojitizing extensions so they can be available thru mojito.*
-// TODO: move yui and contextualizer into their own pkgs
-mojito.plug(require('./node_modules/mojito-server/lib/yui'));
-mojito.plug(require('./node_modules/mojito-server/lib/contextualizer'));
+mojito.plug(require('mojito-yui'));
+mojito.plug(require('mojito-contextualizer'));
 
 mojito.contextualizer({
-    foo: 'context',
+    more: 'configs here',
     dimensions: { /* can should be coming from locator */
         lang: {
             "en-US": null
@@ -35,8 +36,7 @@ mojito.contextualizer({
     }
 });
 
-// registering a `dispatch engine`, the only requirement is to have
-// a `dispatch` method.
+// registering a fake `dispatch engine`.
 mojito.dispatcher('mojito', {
     dispatch: function (name, options, runtime, callback) {
         callback(null, JSON.stringify({
@@ -79,6 +79,7 @@ app.configure('production', function () {
 
     // serving YUI from CDN directly
     app.use(mojito.yui.cdn());
+
     // Set a few security-related headers.
     // X-Content-Type-Options=nosniff
     // X-Frame-Options=SAMEORIGIN
