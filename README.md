@@ -20,7 +20,7 @@ var mojito = require('mojito-server'),
     });
 
 // mojitizing extensions so they can be available thru mojito.*
-mojito.plug(require('mojito-yui'));
+// contextualizer plug into mojito
 mojito.plug(require('mojito-contextualizer'));
 
 mojito.contextualizer({
@@ -36,16 +36,21 @@ mojito.contextualizer({
     }
 });
 
-// registering a fake `dispatch engine`.
-mojito.dispatcher('mojito', {
-    dispatch: function (name, options, runtime, callback) {
-        callback(null, JSON.stringify({
-            name: name,
-            options: options,
-            runtime: runtime
-        }));
-    }
-});
+// we could drive this by dimensions automatically by using
+// `app.use(mojito.contextualizer.all())` which matches contextualizer.* and
+// dimensions.*, so by hanging a middleware from contextualizer
+// you are automatically enabling a new dimension to be populated;
+app.use(mojito.contextualizer.all);
+// or manually like this:
+// app.use(mojito.contextualizer.lang);
+// app.use(mojito.contextualizer.device);
+
+
+
+
+// mojitizing extensions so they can be available thru mojito.*
+// yui plug into mojito
+mojito.plug(require('mojito-yui'));
 
 app.configure('development', function () {
     mojito.yui({
@@ -86,39 +91,53 @@ app.configure('production', function () {
     app.use(mojito.lockDownSecurity);
 });
 
-// we could drive this by dimensions automatically by using
-// `app.use(mojito.contextualizer.all())` which matches contextualizer.* and
-// dimensions.*, so by hanging a middleware from contextualizer
-// you are automatically enabling a new dimension to be populated;
-app.use(mojito.contextualizer.all);
-// or manually like this:
-// app.use(mojito.contextualizer.lang);
-// app.use(mojito.contextualizer.device);
+
+
+// registering a fake `dispatch engine`. Usually, we should do:
+// `mojito.dispatcher('<dispatcher-name>', require('<dispatcher-name>'))`
+// and if we have multiple dispatch engines attached, we can select the
+// default one by doing: `app.set('dispatch engine', '<dispatcher-name>')`
+mojito.dispatcher('mojito', {
+    dispatch: function (name, options, page, callback) {
+        callback(null, JSON.stringify({
+            name: name,
+            options: options,
+            page: page
+        }));
+    }
+});
+
+
+
+
+// these are all the routes that our client side will be able to
+// dispatch without a fullpage refresh, `mojito.dispatch()` is
+// required. The grouping helps with apps with different pages
+// where each page represents an app in the client side.
 
 // mojito will use dispatcher config to dispatch "index"
 app.get('/', mojito.dispatch('index'));
 
-mojito.exposeRoutes(function () {
-    // these are all the routes that our client side will be able to
-    // dispatch without a fullpage refresh, `mojito.dispatch()` is
-    // required. The grouping helps with apps with different pages
-    // where each page represents an app in the client side.
-    app.get('/photo', mojito.dispatch('photo', {
-        json: true
-    }));
+// forcing to print on json format
+app.get('/photo', mojito.dispatch('photo', {
+    json: true
+}));
 
-    // you can have route specific middleware,
-    // and you can also add group specific middleware
-    // by passing them into `mojito.exposeRoutes()`
-    app.get('/photos', mojito.data('place'),
-            mojito.dispatch('photos'));
-});
+// you can have route specific middleware that will expose data
+// into the page object as well.
+app.get('/photos', mojito.data('place'), mojito.dispatch('photos'));
+
+
+
 
 // Error handlers
 app.use(mojito.notFound);
 app.configure('production', function () {
     app.use(mojito.internalServerError);
 });
+
+
+
 
 // listening
 app.listen(app.get('port'), function () {
